@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, make_response, redirect, flash
+import helper
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -13,6 +14,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 
 @app.route("/")
+@helper.user_required
 def home():
     return render_template('home.html')
 
@@ -24,14 +26,18 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         if email == "igo@coelho.com" and password == "1234":
-            return make_response(redirect("/", 302))
+            response = make_response(redirect("/", 302))
+            response.set_cookie("token", "fsjdlfsdlkfsldfkjslkdfjsldkjfsldf")
+            return response
         else:
             flash("Invalid Email or Password. Please try again!")
             return make_response(redirect("/login", 302))
 
 @app.route("/logoff")
 def logoff():
-    return render_template('login.html')
+    response = make_response(redirect("/login", 302))
+    response.delete_cookie("token")
+    return response
 
 if __name__ == "__main__":
     debug_mode = args.debug or False
