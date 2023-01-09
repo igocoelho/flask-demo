@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response, redirect, flash
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -10,17 +10,24 @@ parser.add_argument("--port", help="Port number")
 args = parser.parse_args()
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret-key-goes-here'
 
 @app.route("/")
-def hello():
-    return "Hello World!"
+def home():
+    return render_template('home.html')
 
 @app.route("/login", methods=['GET','POST'])
 def login():
     if request.method == "GET":
         return render_template('login.html')
     else:
-        return "LOGON"
+        email = request.form.get("email")
+        password = request.form.get("password")
+        if email == "igo@coelho.com" and password == "1234":
+            return make_response(redirect("/", 302))
+        else:
+            flash("Invalid Email or Password. Please try again!")
+            return make_response(redirect("/login", 302))
 
 @app.route("/logoff")
 def logoff():
